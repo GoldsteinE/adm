@@ -1,0 +1,19 @@
+[package]
+name = "adm"
+version = "0.1.0"
+authors = ["Maximilian Siling <mouse-art@ya.ru>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+actix-web = "3.3.2"
+color-eyre = "0.5.10"
+futures = "0.3.9"
+hex = "0.4.2"
+hmac = "0.10.1"
+ron = "0.6.4"
+serde = { version = "1.0.118", features = ["derive"] }
+serde_json = "1.0.61"
+sha2 = "0.9.2"
+thiserror = "1.0.23"
