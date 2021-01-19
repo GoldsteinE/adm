@@ -7,13 +7,25 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+actix = "0.10.0"
+actix-rt = "1.1.1"
 actix-web = "3.3.2"
+awc = "2.0.3"
 color-eyre = "0.5.10"
+dashmap = "4.0.2"
+dotenv = "0.15.0"
+envy = "0.4.2"
 futures = "0.3.9"
+git2 = "0.13.15"
 hex = "0.4.2"
 hmac = "0.10.1"
 ron = "0.6.4"
+secstr = "0.4.0"
 serde = { version = "1.0.118", features = ["derive"] }
 serde_json = "1.0.61"
 sha2 = "0.9.2"
 thiserror = "1.0.23"
+tokio = { version = "1.0.2", features = ["sync", "rt"] }
+tracing = "0.1.22"
+tracing-log = "0.1.1"
+tracing-subscriber = { version = "0.2.15", features = ["fmt"] }
