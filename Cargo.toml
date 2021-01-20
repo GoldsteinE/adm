@@ -4,8 +4,6 @@ version = "0.1.0"
 authors = ["Maximilian Siling <mouse-art@ya.ru>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
 actix = "0.10.0"
 actix-rt = "1.1.1"
