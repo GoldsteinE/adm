@@ -1,0 +1,15 @@
+[Unit]
+Description=Simple CD system
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/adm
+Restart=on-failure
+User=webhook
+Group=webhook
+EnvironmentFile=/etc/adm.env
+
+[Install]
+WantedBy=multi-user.target
+
+# vim: ft=systemd
