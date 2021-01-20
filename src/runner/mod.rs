@@ -150,6 +150,8 @@ impl Handler<Task> for Runner {
 
         let task = Arc::new(task);
         let status = Arc::new(res.into());
-        self.notifier.do_send(Notification { task, status })
+        if let Err(err) = self.notifier.try_send(Notification { task, status }) {
+            tracing::error!("Failed to send notification: {}", err);
+        }
     }
 }
