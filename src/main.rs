@@ -30,7 +30,7 @@ mod signature;
 use std::sync::Arc;
 
 use actix::{Actor, SyncArbiter};
-use actix_web::{middleware::Logger, web, App, HttpServer};
+use actix_web::{guard, middleware::Logger, web, App, HttpServer};
 use color_eyre::eyre;
 
 use crate::runner::Runner;
@@ -65,7 +65,12 @@ async fn main() -> eyre::Result<()> {
             .data(builder.clone())
             .app_data(http::WebhookConfig::new(webhook_secret.clone()))
             .wrap(Logger::default())
-            .route("/{repo}", web::post().to(hooks::push_hook))
+            .route(
+                "/{repo}",
+                web::post()
+                    .guard(guard::Header("X-GitHub-Event", "push"))
+                    .to(hooks::push_hook),
+            )
     })
     .bind("127.0.0.1:8080")?
     .run()

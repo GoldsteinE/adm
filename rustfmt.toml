@@ -1,3 +1,4 @@
+edition = "2018"
 unstable_features = true
 blank_lines_upper_bound = 2
 format_macro_matchers = true
