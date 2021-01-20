@@ -5,7 +5,10 @@ use std::{path::PathBuf, process::Command, sync::Arc};
 use actix::prelude::*;
 use color_eyre::eyre::{self, WrapErr as _};
 
-use crate::lock_manager::LockManager;
+use crate::{
+    lock_manager::LockManager,
+    notifier::{Notification, Notifier},
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BranchSpec {
@@ -14,33 +17,46 @@ pub struct BranchSpec {
     pub branch: String,
 }
 
+#[derive(Debug, Clone)]
+pub enum Reason {
+    PushToMaster,
+}
+
 #[derive(Debug, Clone, Message)]
-#[rtype(result = "eyre::Result<()>")]
+#[rtype(result = "()")]
 pub struct Task {
     pub branch_spec: BranchSpec,
     pub commit_hash: String,
     pub url: String,
+    pub reason: Reason,
 }
 
 #[derive(Debug, Clone)]
 pub struct Runner {
     base_path: PathBuf,
     lock_manager: Arc<LockManager<BranchSpec>>,
+    notifier: Addr<Notifier>,
 }
 
 impl Runner {
-    pub fn new(base_path: PathBuf, lock_manager: Arc<LockManager<BranchSpec>>) -> Self {
+    pub fn new(
+        base_path: PathBuf,
+        lock_manager: Arc<LockManager<BranchSpec>>,
+        notifier: Addr<Notifier>,
+    ) -> Self {
         Self {
             base_path,
             lock_manager,
+            notifier,
         }
     }
 
-    fn process_task(&self, task: Task) -> eyre::Result<()> {
+    fn process_task(&self, task: &Task) -> eyre::Result<()> {
         let lock_key = task.branch_spec.clone();
         let Task {
             url,
             commit_hash,
+            reason: _,
             branch_spec:
                 BranchSpec {
                     owner,
@@ -64,7 +80,7 @@ impl Runner {
             path,
         );
         std::fs::create_dir_all(&path)
-            .wrap_err_with(|| format!("Failed to create build directory {:?}", path))?;
+            .wrap_err_with(|| format!("failed to create build directory {:?}", path))?;
 
         self.lock_manager.with_lock(lock_key, || {
             tracing::info!("Acquired lock for {}/{}, starting build", owner, repo_name);
@@ -72,10 +88,10 @@ impl Runner {
             let mut repo = git::open_or_clone(&url, &path).map_err(|err| -> eyre::Report {
                 eyre::Report::new(err.0)
                     .wrap_err(err.1)
-                    .wrap_err("Failed to open or clone repo")
+                    .wrap_err("failed to open or clone repo")
             })?;
-            git::pull_repo(&mut repo).wrap_err("Failed to pull repo")?;
-            git::checkout(&mut repo, &commit_hash).wrap_err("Failed to checkout repo")?;
+            git::pull_repo(&mut repo).wrap_err("failed to pull repo")?;
+            git::checkout(&mut repo, &commit_hash).wrap_err("failed to checkout repo")?;
 
             let output = Command::new("docker-compose")
                 .arg("up")
@@ -87,7 +103,7 @@ impl Runner {
                 )
                 .current_dir(&path)
                 .output()
-                .wrap_err("Failed to run `docker-compose`")?;
+                .wrap_err("failed to run `docker-compose`")?;
 
             if output.status.success() {
                 tracing::info!(
@@ -104,7 +120,7 @@ impl Runner {
                     "`docker-compose` returned failure. STDERR: {}",
                     String::from_utf8_lossy(&output.stderr),
                 );
-                eyre::bail!("Failed to deploy");
+                eyre::bail!("failed to deploy");
             }
         })
     }
@@ -127,10 +143,13 @@ impl Handler<Task> for Runner {
             commit_hash = task.commit_hash.as_str(),
         );
         let _guard = span.enter();
-        let res = self.process_task(task);
+        let res = self.process_task(&task);
         if let Err(err) = &res {
             tracing::error!("{}", err);
         }
-        res
+
+        let task = Arc::new(task);
+        let status = Arc::new(res.into());
+        self.notifier.do_send(Notification { task, status })
     }
 }

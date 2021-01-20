@@ -1,10 +1,8 @@
-use std::borrow::Borrow;
-
 use actix_web::{
     dev::Payload, error::ResponseError, http::StatusCode, web::Bytes, FromRequest, HttpRequest,
 };
 use futures::future::{FutureExt, LocalBoxFuture};
-use secstr::SecStr;
+use secstr::SecUtf8;
 
 use crate::signature::{self, Signature};
 
@@ -48,11 +46,11 @@ impl ResponseError for WebhookError {
 
 #[derive(Debug, Default)]
 pub struct WebhookConfig {
-    pub key: Option<SecStr>,
+    pub key: Option<SecUtf8>,
 }
 
 impl WebhookConfig {
-    pub fn new(key: SecStr) -> Self {
+    pub fn new(key: SecUtf8) -> Self {
         Self { key: Some(key) }
     }
 }
@@ -79,7 +77,12 @@ where
                 let bytes = bytes?;
                 let actual_signature = {
                     let mut mac = hmac::Hmac::<sha2::Sha256>::new_varkey(
-                        config.key.as_ref().ok_or(WebhookError::NoHmacKey)?.borrow(),
+                        config
+                            .key
+                            .as_ref()
+                            .ok_or(WebhookError::NoHmacKey)?
+                            .unsecure()
+                            .as_bytes(),
                     )?;
                     mac.update(&bytes);
                     mac.finalize()

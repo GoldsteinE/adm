@@ -3,7 +3,7 @@ use actix_web::web;
 use crate::{
     github::PushEvent,
     http::Webhook,
-    runner::{BranchSpec, Runner, Task},
+    runner::{BranchSpec, Reason, Runner, Task},
 };
 
 #[derive(Debug, Clone, thiserror::Error)]
@@ -30,7 +30,8 @@ pub async fn push_hook(
     Webhook(hook): Webhook<PushEvent>,
     tx: web::Data<actix::Addr<Runner>>,
 ) -> Result<String, PushHookError> {
-    let branch = hook.reference
+    let branch = hook
+        .reference
         .strip_prefix("refs/heads/")
         .ok_or(PushHookError::NotBranch)?;
 
@@ -44,6 +45,7 @@ pub async fn push_hook(
             repo: hook.repository.name,
             branch: branch.to_string(),
         },
+        reason: Reason::PushToMaster,
         url: hook.repository.url,
         commit_hash: hook.after,
     };

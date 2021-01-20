@@ -6,13 +6,13 @@ mod github;
 mod hooks;
 mod http;
 mod lock_manager;
+mod notifier;
 mod runner;
 mod signature;
-mod telegram;
 
 use std::sync::Arc;
 
-use actix::SyncArbiter;
+use actix::{Actor, SyncArbiter};
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use color_eyre::eyre;
 
@@ -28,20 +28,25 @@ async fn main() -> eyre::Result<()> {
     let config::Config {
         repo_root,
         webhook_secret,
-        // telegram_token,
-        // telegram_groups,
+        telegram_token,
+        telegram_groups,
         parallel_builds,
         ..
     } = envy::prefixed("ADM_").from_env()?;
 
+    let notifier = notifier::Notifier::new(notifier::Config {
+        telegram_token,
+        telegram_groups,
+    })
+    .start();
     let lock_manager = Arc::new(lock_manager::LockManager::new());
-    let addr = SyncArbiter::start(parallel_builds as usize, move || {
-        Runner::new(repo_root.clone(), lock_manager.clone())
+    let builder = SyncArbiter::start(parallel_builds as usize, move || {
+        Runner::new(repo_root.clone(), lock_manager.clone(), notifier.clone())
     });
 
     HttpServer::new(move || {
         App::new()
-            .data(addr.clone())
+            .data(builder.clone())
             .app_data(http::WebhookConfig {
                 key: Some(webhook_secret.clone()),
             })

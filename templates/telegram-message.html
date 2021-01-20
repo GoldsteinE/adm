@@ -1,0 +1,9 @@
+{% let owner = task.branch_spec.owner.as_str() %}
+{% let name = task.branch_spec.repo.as_str() %}
+{% let branch = task.branch_spec.branch.as_str() %}
+
+Build for <a href="{{task.url}}">{{owner}}/{{name}}</a> finished!
+
+<b>Status:</b> {{status}}
+<b>Branch:</b> <a href="https://github.com/{{owner}}/{{name}}/tree/{{branch}}">{{branch}}</a>
+<b>Commit:</b> <a href="https://github.com/{{owner}}/{{name}}/commit/{{task.commit_hash}}">{{task.commit_hash}}</a>
