@@ -43,6 +43,8 @@ async fn main() -> eyre::Result<()> {
     tracing::subscriber::set_global_default(tracing_subscriber::fmt().finish())?;
 
     let config::Config {
+        host,
+        port,
         repo_root,
         webhook_secret,
         telegram_token,
@@ -72,7 +74,7 @@ async fn main() -> eyre::Result<()> {
                     .to(hooks::push_hook),
             )
     })
-    .bind("127.0.0.1:8080")?
+    .bind((host, port))?
     .run()
     .await
     .map_err(Into::into)
