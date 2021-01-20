@@ -7,6 +7,8 @@ use secstr::SecUtf8;
 use super::Status;
 use crate::runner::Task;
 
+// Keep unused variants for documentation
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, serde::Serialize)]
 enum ParseMode {
     HTML,
@@ -47,7 +49,7 @@ impl Telegram {
             Self { http, url, chats }
     }
 
-    async fn try_notify(&self, task: Arc<Task>, status: Arc<super::Status>) -> eyre::Result<()> {
+    async fn try_notify(&self, task: Arc<Task>, status: Arc<Status>) -> eyre::Result<()> {
         let text = &MessageTemplate::new(&task, &status)
             .render()
             .wrap_err("Failed to render message template")?;
@@ -83,7 +85,7 @@ impl Telegram {
         Ok(())
     }
 
-    pub async fn notify(self: Arc<Self>, task: Arc<Task>, status: Arc<super::Status>) {
+    pub async fn notify(self: Arc<Self>, task: Arc<Task>, status: Arc<Status>) {
         if let Err(err) = self.try_notify(task, status).await {
             tracing::error!("Failed sending Telegram notification: {}", err);
         }

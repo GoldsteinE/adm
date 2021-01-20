@@ -1,4 +1,21 @@
-#![allow(dead_code)]
+#![deny(unsafe_code)]
+#![deny(non_ascii_idents)]
+#![deny(pointer_structural_match)]
+#![warn(clippy::pedantic)]
+#![warn(absolute_paths_not_starting_with_crate)]
+#![warn(anonymous_parameters)]
+#![warn(deprecated_in_future)]
+#![warn(elided_lifetimes_in_paths)]
+#![warn(explicit_outlives_requirements)]
+#![warn(meta_variable_misuse)]
+#![warn(missing_debug_implementations)]
+#![warn(trivial_casts)]
+#![warn(trivial_numeric_casts)]
+#![warn(unused_crate_dependencies)]
+#![warn(unused_import_braces)]
+#![warn(unused_lifetimes)]
+#![warn(unused_qualifications)]
+#![warn(variant_size_differences)]
 
 mod config;
 mod git;
@@ -31,7 +48,6 @@ async fn main() -> eyre::Result<()> {
         telegram_token,
         telegram_groups,
         parallel_builds,
-        ..
     } = envy::prefixed("ADM_").from_env()?;
 
     let notifier = notifier::Notifier::new(notifier::Config {
@@ -47,9 +63,7 @@ async fn main() -> eyre::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(builder.clone())
-            .app_data(http::WebhookConfig {
-                key: Some(webhook_secret.clone()),
-            })
+            .app_data(http::WebhookConfig::new(webhook_secret.clone()))
             .wrap(Logger::default())
             .route("/{repo}", web::post().to(hooks::push_hook))
     })

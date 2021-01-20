@@ -15,26 +15,24 @@ pub struct Signature(pub [u8; 32]);
 
 impl Signature {
     pub fn from_headers(headers: &actix_web::http::HeaderMap) -> Result<Self, Error> {
-        use Error::*;
-
         let sig_b = headers
             .get("X-Hub-Signature-256")
-            .ok_or(HeaderNotFound)?
+            .ok_or(Error::HeaderNotFound)?
             .as_ref();
 
         let prefix = b"sha256=";
         let prefix_len = prefix.len();
         if sig_b.len() != 64 + prefix_len {
-            return Err(InvalidLength);
+            return Err(Error::InvalidLength);
         }
         let (sig_prefix, sig_b) = sig_b.split_at(prefix_len);
         if sig_prefix != prefix {
-            return Err(InvalidPrefix);
+            return Err(Error::InvalidPrefix);
         }
 
         hex::FromHex::from_hex(sig_b)
             .map(Self)
-            .map_err(|_| NotHex)
+            .map_err(|_| Error::NotHex)
     }
 }
 

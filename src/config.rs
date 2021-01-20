@@ -16,12 +16,12 @@ fn deserialize_secutf8<'de, D>(de: D) -> Result<SecUtf8, D::Error>
 where
     D: Deserializer<'de>,
 {
-    String::deserialize(de).map(|s| SecUtf8::from(s))
+    String::deserialize(de).map(SecUtf8::from)
 }
 
 fn deserialize_opt_secutf8<'de, D>(de: D) -> Result<Option<SecUtf8>, D::Error>
 where
     D: Deserializer<'de>,
 {
-    Option::<String>::deserialize(de).map(|o| o.map(|s| SecUtf8::from(s)))
+    Option::<String>::deserialize(de).map(|o| o.map(SecUtf8::from))
 }

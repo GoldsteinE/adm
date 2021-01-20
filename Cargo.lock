@@ -19,7 +19,7 @@ dependencies = [
  "parking_lot",
  "pin-project 0.4.27",
  "smallvec",
- "tokio 0.2.24",
+ "tokio",
  "tokio-util",
  "trust-dns-proto",
  "trust-dns-resolver",
@@ -37,7 +37,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project 0.4.27",
- "tokio 0.2.24",
+ "tokio",
  "tokio-util",
 ]
 
@@ -146,7 +146,7 @@ dependencies = [
  "futures-channel",
  "futures-util",
  "smallvec",
- "tokio 0.2.24",
+ "tokio",
 ]
 
 [[package]]
@@ -325,7 +325,6 @@ name = "adm"
 version = "0.1.0"
 dependencies = [
  "actix",
- "actix-rt",
  "actix-web",
  "askama",
  "awc",
@@ -337,13 +336,11 @@ dependencies = [
  "git2",
  "hex",
  "hmac",
- "ron",
  "secstr",
  "serde",
  "serde_json",
  "sha2",
  "thiserror",
- "tokio 1.0.2",
  "tracing",
  "tracing-log",
  "tracing-subscriber",
@@ -1001,7 +998,7 @@ dependencies = [
  "http",
  "indexmap",
  "slab",
- "tokio 0.2.24",
+ "tokio",
  "tokio-util",
  "tracing",
  "tracing-futures",
@@ -1706,17 +1703,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ron"
-version = "0.6.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "064ea8613fb712a19faf920022ec8ddf134984f100090764a4e1d768f3827f1f"
-dependencies = [
- "base64 0.13.0",
- "bitflags",
- "serde",
-]
-
-[[package]]
 name = "rustc-demangle"
 version = "0.1.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2123,16 +2109,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "tokio"
-version = "1.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ca04cec6ff2474c638057b65798f60ac183e5e79d3448bb7163d36a39cff6ec"
-dependencies = [
- "autocfg",
- "pin-project-lite 0.2.4",
-]
-
-[[package]]
 name = "tokio-rustls"
 version = "0.14.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2140,7 +2116,7 @@ checksum = "e12831b255bcfa39dc0436b01e19fea231a37db570686c06ee72c423479f889a"
 dependencies = [
  "futures-core",
  "rustls",
- "tokio 0.2.24",
+ "tokio",
  "webpki",
 ]
 
@@ -2156,7 +2132,7 @@ dependencies = [
  "futures-sink",
  "log",
  "pin-project-lite 0.1.11",
- "tokio 0.2.24",
+ "tokio",
 ]
 
 [[package]]
@@ -2280,7 +2256,7 @@ dependencies = [
  "rand",
  "smallvec",
  "thiserror",
- "tokio 0.2.24",
+ "tokio",
  "url",
 ]
 
@@ -2300,7 +2276,7 @@ dependencies = [
  "resolv-conf",
  "smallvec",
  "thiserror",
- "tokio 0.2.24",
+ "tokio",
  "trust-dns-proto",
 ]
 

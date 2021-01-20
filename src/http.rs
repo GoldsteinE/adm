@@ -34,11 +34,13 @@ impl From<hmac::crypto_mac::InvalidKeyLength> for WebhookError {
 impl ResponseError for WebhookError {
     fn status_code(&self) -> StatusCode {
         match self {
-            WebhookError::SignatureParseError(_) => StatusCode::BAD_REQUEST,
+            WebhookError::SignatureParseError(_) | WebhookError::JsonError(_) => {
+                StatusCode::BAD_REQUEST
+            }
             WebhookError::InvalidSignature => StatusCode::FORBIDDEN,
-            WebhookError::NoHmacKey => StatusCode::INTERNAL_SERVER_ERROR,
-            WebhookError::HmacInvalidLength => StatusCode::INTERNAL_SERVER_ERROR,
-            WebhookError::JsonError(_) => StatusCode::BAD_REQUEST,
+            WebhookError::NoHmacKey | WebhookError::HmacInvalidLength => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
             WebhookError::ActixError(err) => err.as_response_error().status_code(),
         }
     }
