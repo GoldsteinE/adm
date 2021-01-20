@@ -36,11 +36,11 @@ impl ResponseError for WebhookError {
         match self {
             WebhookError::SignatureParseError(_) | WebhookError::JsonError(_) => {
                 StatusCode::BAD_REQUEST
-            }
+            },
             WebhookError::InvalidSignature => StatusCode::FORBIDDEN,
             WebhookError::NoHmacKey | WebhookError::HmacInvalidLength => {
                 StatusCode::INTERNAL_SERVER_ERROR
-            }
+            },
             WebhookError::ActixError(err) => err.as_response_error().status_code(),
         }
     }
@@ -61,9 +61,9 @@ impl<T> FromRequest for Webhook<T>
 where
     T: serde::de::DeserializeOwned,
 {
+    type Config = WebhookConfig;
     type Error = WebhookError;
     type Future = LocalBoxFuture<'static, Result<Self, Self::Error>>;
-    type Config = WebhookConfig;
 
     fn from_request(req: &HttpRequest, payload: &mut Payload) -> Self::Future {
         let req = req.clone();

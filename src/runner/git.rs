@@ -12,7 +12,7 @@ pub fn open_or_clone(
                 path
             );
             Ok(repo)
-        }
+        },
         Err(open_err) => match git2::Repository::clone(url, &path) {
             Ok(repo) => {
                 tracing::info!(
@@ -23,7 +23,7 @@ pub fn open_or_clone(
                     path
                 );
                 Ok(repo)
-            }
+            },
             Err(clone_err) => {
                 tracing::error!(
                     url = url,
@@ -36,7 +36,7 @@ pub fn open_or_clone(
                     clone_err,
                 );
                 Err((open_err, clone_err))
-            }
+            },
         },
     }
 }
@@ -47,7 +47,7 @@ pub fn pull_repo(repo: &mut git2::Repository) -> Result<(), git2::Error> {
         Err(err) => {
             tracing::error!("Failed to find remote `origin`: {}", err);
             return Err(err);
-        }
+        },
     };
 
     if let Err(err) = origin.fetch(&["master"], None, None) {
@@ -64,14 +64,14 @@ pub fn checkout(repo: &mut git2::Repository, commit_id: &str) -> Result<(), git2
         Err(err) => {
             tracing::error!("Invalid commit ID `{}`: {}", commit_id, err);
             return Err(err);
-        }
+        },
     };
     let commit = match repo.find_commit(oid) {
         Ok(commit) => commit,
         Err(err) => {
             tracing::error!("Failed to find commit `{}`: {}", oid, err);
             return Err(err);
-        }
+        },
     };
     if let Err(err) = repo.reset(
         commit.as_object(),

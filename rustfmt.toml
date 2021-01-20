@@ -1,0 +1,12 @@
+unstable_features = true
+blank_lines_upper_bound = 2
+format_macro_matchers = true
+format_strings = true
+match_block_trailing_comma = true
+imports_granularity = "Crate"
+newline_style = "Unix"
+overflow_delimited_expr = true
+reorder_impl_items = true
+group_imports = "StdExternalCrate"
+use_field_init_shorthand = true
+wrap_comments = true

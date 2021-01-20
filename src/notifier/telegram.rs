@@ -45,8 +45,11 @@ pub struct Telegram {
 
 impl Telegram {
     pub fn new(http: Arc<awc::Client>, token: &SecUtf8, chats: Vec<i64>) -> Self {
-        let url = SecUtf8::from(format!("https://api.telegram.org/bot{}/sendMessage", token.unsecure()));
-            Self { http, url, chats }
+        let url = SecUtf8::from(format!(
+            "https://api.telegram.org/bot{}/sendMessage",
+            token.unsecure()
+        ));
+        Self { http, url, chats }
     }
 
     async fn try_notify(&self, task: Arc<Task>, status: Arc<Status>) -> eyre::Result<()> {

@@ -4,11 +4,10 @@ mod status;
 mod telegram;
 use std::sync::Arc;
 
-pub use self::status::Status;
-
 use actix::prelude::*;
 use secstr::SecUtf8;
 
+pub use self::status::Status;
 use crate::runner::Task;
 
 #[derive(Debug, Clone, Message)]
@@ -35,13 +34,10 @@ impl fmt::Debug for Notifier {
         struct Disabled;
 
         f.debug_struct("Notifier")
-            .field(
-                "telergam",
-                match &self.telegram {
-                    Some(telegram) => &telegram.chats,
-                    None => &Disabled,
-                },
-            )
+            .field("telergam", match &self.telegram {
+                Some(telegram) => &telegram.chats,
+                None => &Disabled,
+            })
             .finish()
     }
 }

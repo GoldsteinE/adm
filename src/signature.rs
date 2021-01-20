@@ -35,4 +35,3 @@ impl Signature {
             .map_err(|_| Error::NotHex)
     }
 }
-

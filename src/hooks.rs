@@ -55,6 +55,6 @@ pub async fn push_hook(
         err @ Err(_) => {
             tracing::error!("Failed to send task: {:?}", err);
             Err(PushHookError::SendError)
-        }
+        },
     }
 }
