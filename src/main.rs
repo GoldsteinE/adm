@@ -9,13 +9,14 @@ mod lock_manager;
 mod runner;
 mod signature;
 mod telegram;
-mod act_runner;
 
 use std::sync::Arc;
 
+use actix::SyncArbiter;
 use actix_web::{middleware::Logger, web, App, HttpServer};
 use color_eyre::eyre;
-use tokio::sync::mpsc;
+
+use crate::runner::Runner;
 
 #[actix_web::main]
 async fn main() -> eyre::Result<()> {
@@ -27,18 +28,20 @@ async fn main() -> eyre::Result<()> {
     let config::Config {
         repo_root,
         webhook_secret,
-        telegram_token,
-        telegram_groups,
+        // telegram_token,
+        // telegram_groups,
+        parallel_builds,
+        ..
     } = envy::prefixed("ADM_").from_env()?;
 
-    let lock_manager = Arc::new(lock_manager::LockManager::<(String, String)>::new());
-    let runner = runner::Runner::new(repo_root, lock_manager);
-    let (tx, rx) = mpsc::channel(10);
-    actix_rt::spawn(runner.run_builds(rx));
+    let lock_manager = Arc::new(lock_manager::LockManager::new());
+    let addr = SyncArbiter::start(parallel_builds as usize, move || {
+        Runner::new(repo_root.clone(), lock_manager.clone())
+    });
 
     HttpServer::new(move || {
         App::new()
-            .data(tx.clone())
+            .data(addr.clone())
             .app_data(http::WebhookConfig {
                 key: Some(webhook_secret.clone()),
             })

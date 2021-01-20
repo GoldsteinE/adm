@@ -9,6 +9,7 @@ pub struct Config {
     #[serde(deserialize_with = "deserialize_opt_secstr")]
     pub telegram_token: Option<SecStr>,
     pub telegram_groups: Vec<i64>,
+    pub parallel_builds: u8,
 }
 
 fn deserialize_secstr<'de, D>(de: D) -> Result<SecStr, D::Error>

@@ -1,7 +1,10 @@
 use actix_web::web;
-use tokio::sync::mpsc;
 
-use crate::{github::PushEvent, http::Webhook, runner::Task};
+use crate::{
+    github::PushEvent,
+    http::Webhook,
+    runner::{BranchSpec, Runner, Task},
+};
 
 #[derive(Debug, Clone, thiserror::Error)]
 pub enum PushHookError {
@@ -25,28 +28,31 @@ impl actix_web::ResponseError for PushHookError {
 
 pub async fn push_hook(
     Webhook(hook): Webhook<PushEvent>,
-    tx: web::Data<mpsc::Sender<Task>>,
+    tx: web::Data<actix::Addr<Runner>>,
 ) -> Result<String, PushHookError> {
-    let branch = if let Some(branch) = hook.reference.strip_prefix("refs/heads/") {
-        branch
-    } else {
-        return Err(PushHookError::NotBranch);
-    };
+    let branch = hook.reference
+        .strip_prefix("refs/heads/")
+        .ok_or(PushHookError::NotBranch)?;
 
     if branch != "master" {
         return Err(PushHookError::NotMaster);
     }
 
     let task = Task {
+        branch_spec: BranchSpec {
+            owner: hook.repository.owner.login,
+            repo: hook.repository.name,
+            branch: branch.to_string(),
+        },
         url: hook.repository.url,
-        owner: hook.repository.owner.login,
-        repo: hook.repository.name,
-        branch: branch.to_string(),
         commit_hash: hook.after,
     };
 
-    tx.send(task)
-        .await
-        .map(|()| "OK".into())
-        .map_err(|_| PushHookError::SendError)
+    match tx.try_send(task) {
+        Ok(()) => Ok("OK".into()),
+        err @ Err(_) => {
+            tracing::error!("Failed to send task: {:?}", err);
+            Err(PushHookError::SendError)
+        }
+    }
 }
